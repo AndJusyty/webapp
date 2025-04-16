@@ -63,24 +63,18 @@ function drawChart(dt) {
 
 const tg = window.Telegram.WebApp;
 
-  document.getElementById("submitBtn").addEventListener("click", () => {
-    const date = document.getElementById("dateInput").value;
-    const time = document.getElementById("timeInput").value;
+  // document.getElementById("submitBtn").addEventListener("click", () => {
+  //   const date = document.getElementById("dateInput").value;
+  //   const time = document.getElementById("timeInput").value;
 
-    if (!date || !time) {
-      alert("Пожалуйста, выберите дату и время");
-      return;
-    }
+  //   if (!date || !time) {
+  //     alert("Пожалуйста, выберите дату и время");
+  //     return;
+  //   }
 
     const datetimeString = `${date} ${time}`;
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-    tg.sendData(JSON.stringify({
-      datetime: datetimeString,
-      formatted: new Date(datetimeString).toLocaleString(),
-      timezone
-    }));
-
+    tg.sendData(JSON.stringify(payload));
     tg.close(); // Закрыть WebApp
-  });
 
