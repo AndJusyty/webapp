@@ -36,7 +36,7 @@
   </style>
 </head>
 <body>
-
+<div id="clearform">
 <h2>📅 Выберите дату, время и таймзону</h2>
 
 <input type="text" id="date" placeholder="Дата">
@@ -50,12 +50,15 @@
 </select>
 
 <button id="showBtn">📊 Показать результат</button>
+<button onclick="location.reload()">Очистить</button>
 
 <div id="result">⏳ Ожидаем выбор...</div>
 
 <canvas id="timeChart"></canvas>
-
+</div>
 <script>
+
+  
   const { DateTime } = luxon;
   let selectedDate = null;
   let selectedTime = null;
@@ -138,6 +141,7 @@
     Telegram.WebApp.expand();
   }
 </script>
+
 
 </body>
 </html>

@@ -10,7 +10,7 @@ def send_webapp(message):
     markup.add(
         InlineKeyboardButton(
             text="📅 Открыть планировщик",
-            web_app=WebAppInfo(url="https://andjusyty.github.io/webapp/")  # замени на своё
+            web_app=WebAppInfo(url="https://andjusyty.github.io/webapp/")
         )
     )
     bot.send_message(message.chat.id, "Нажми кнопку ниже для выбора даты/времени:", reply_markup=markup)
