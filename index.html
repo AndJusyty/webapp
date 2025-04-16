@@ -1,32 +1,122 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <title>Telegram WebApp</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-  <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Datetime Picker with Timezone & Chart</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/luxon/build/global/luxon.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    input, select, button { width: 100%; padding: 10px; margin: 10px 0; font-size: 1rem; }
+    canvas { max-width: 100%; margin-top: 20px; }
+  </style>
 </head>
 <body>
-  <h2>Выберите дату и время:</h2>
-  <input type="date" id="datetime" />
 
-  <h3>Выберите таймзону:</h3>
-  <select id="timezone">
-    <option value="UTC">UTC</option>
-    <option value="Europe/Moscow">Moscow</option>
-    <option value="Asia/Tokyo">Tokyo</option>
-    <option value="America/New_York">New York</option>
-  </select>
+<h2>Выберите дату, время и таймзону</h2>
 
-  <button onclick="handleSend()">Отправить</button>
+<input type="text" id="datetime" placeholder="Дата и время">
+<select id="timezone">
+  <option value="UTC">UTC</option>
+  <option value="Europe/Moscow" selected>Europe/Moscow</option>
+  <option value="America/New_York">America/New_York</option>
+  <option value="Asia/Tokyo">Asia/Tokyo</option>
+  <option value="Asia/Yekaterinburg">Asia/Yekaterinburg</option>
+</select>
 
-  <canvas id="myChart" width="300" height="150"></canvas>
+<button id="sendBtn">Отправить в Telegram</button>
 
-  <script src="script.js"></script>
+<canvas id="timeChart"></canvas>
+
+<script>
+  const { DateTime } = luxon;
+  let selectedDate = null;
+  const chartData = {
+    labels: [],
+    datasets: [{
+      label: "Время",
+      data: [],
+      borderColor: 'rgb(75, 192, 192)',
+      fill: false
+    }]
+  };
+  
+  const ctx = document.getElementById('timeChart').getContext('2d');
+  const timeChart = new Chart(ctx, {
+    type: 'line',
+    data: chartData,
+    options: {
+      scales: {
+        x: { type: 'time', time: { unit: 'hour' }, title: { display: true, text: 'Час' } },
+        y: { title: { display: true, text: 'Время (UTC)' } }
+      }
+    }
+  });
+
+  flatpickr("#datetime", {
+    enableTime: true,
+    dateFormat: "Y-m-d H:i",
+    time_24hr: true,
+    onChange: (dates) => {
+      selectedDate = dates[0];
+      updateChart();
+    }
+  });
+
+  document.getElementById("timezone").addEventListener("change", updateChart);
+
+  function updateChart() {
+    const zone = document.getElementById("timezone").value;
+    if (!selectedDate) return;
+
+    const localDT = DateTime.fromJSDate(selectedDate).setZone(zone);
+    const utcDT = localDT.toUTC();
+    const chartTime = utcDT.toJSDate();
+    chartData.labels.push(chartTime);
+    chartData.datasets[0].data.push(utcDT.toSeconds());
+    timeChart.update();
+    
+    // Отправка данных в Telegram (если WebApp в Telegram)
+    const message = `
+      Выбранное время: ${localDT.toFormat("yyyy-MM-dd HH:mm ZZZZ")}
+      UTC: ${utcDT.toFormat("yyyy-MM-dd HH:mm ZZZZ")}
+      ISO: ${utcDT.toISO()}
+    `;
+    if (window.Telegram && Telegram.WebApp) {
+      Telegram.WebApp.sendData(message);
+    }
+  }
+
+  document.getElementById("sendBtn").addEventListener("click", () => {
+    const zone = document.getElementById("timezone").value;
+    if (!selectedDate) {
+      alert("Пожалуйста, выберите дату и время");
+      return;
+    }
+
+    const localDT = DateTime.fromJSDate(selectedDate).setZone(zone);
+    const utcDT = localDT.toUTC();
+
+    const message = `
+      Выбранное время: ${localDT.toFormat("yyyy-MM-dd HH:mm ZZZZ")}
+      UTC: ${utcDT.toFormat("yyyy-MM-dd HH:mm ZZZZ")}
+      ISO: ${utcDT.toISO()}
+    `;
+    if (window.Telegram && Telegram.WebApp) {
+      Telegram.WebApp.sendData(message);
+    }
+  });
+</script>
+
+<script>
+  if (window.Telegram && Telegram.WebApp) {
+    Telegram.WebApp.ready();
+    Telegram.WebApp.expand(); 
+  }
+</script>
+
 </body>
 </html>
