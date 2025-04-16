@@ -76,83 +76,79 @@
 
 //     tg.sendData(JSON.stringify(payload));
 //     tg.close(); // Закрыть WebApp
+const tg = window.Telegram.WebApp;
+const { DateTime } = luxon;
 
+document.addEventListener("DOMContentLoaded", () => {
+  const button = document.getElementById("submitBtn");
 
-
-
-
-
-
-  const tg = window.Telegram.WebApp;
-  const { DateTime } = luxon;
-
-  document.getElementById("submitBtn").addEventListener("click", () => {
+  button.addEventListener("click", () => {
     const date = document.getElementById("dateInput").value;
     const time = document.getElementById("timeInput").value;
-    const zone = document.getElementById("timezoneSelect").value;
+    const zone = document.getElementById("timezone").value;
 
     if (!date || !time || !zone) {
       alert("Пожалуйста, выберите дату, время и таймзону");
       return;
     }
 
-    // 1. Собираем ISO дату
     const datetimeString = `${date}T${time}`;
     const localDT = DateTime.fromISO(datetimeString);
     const zoned = localDT.setZone(zone);
 
-    // 2. Отправка данных в Telegram
     const result = {
       original: localDT.toISO(),
       inZone: zoned.toFormat("yyyy-LL-dd HH:mm ZZZZ"),
       timezone: zone
     };
 
-    // 3. Строим график
     drawChart(zoned);
 
-    // 4. Отправляем в бота (можно поставить setTimeout, если нужно визуально показать график перед закрытием)
+    // Подождём 1 секунду для визуального эффекта графика
     setTimeout(() => {
       tg.sendData(JSON.stringify(result));
       tg.close();
     }, 1000);
   });
+});
 
-  function drawChart(dt) {
-    const ctx = document.getElementById('myChart').getContext('2d');
+function drawChart(dt) {
+  const ctx = document.getElementById("myChart").getContext("2d");
 
-    // Удаляем предыдущий график, если он есть
-    if (window.myChart) {
-      window.myChart.destroy();
-    }
+  // Удалим предыдущий график, если он был
+  if (window.myChart) {
+    window.myChart.destroy();
+  }
 
-    window.myChart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: ['-2ч', '-1ч', 'Сейчас', '+1ч', '+2ч'],
-        datasets: [{
-          label: 'Активность (пример)',
-          data: [5, 6, 8, 6, 4],
-          borderColor: 'rgba(0, 136, 204, 1)',
-          backgroundColor: 'rgba(0, 136, 204, 0.2)',
-          tension: 0.3
-        }]
+  window.myChart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: ["-2ч", "-1ч", "Сейчас", "+1ч", "+2ч"],
+      datasets: [{
+        label: "Событие (пример)",
+        data: [5, 6, 8, 6, 4],
+        borderColor: "rgba(75, 192, 192, 1)",
+        backgroundColor: "rgba(75, 192, 192, 0.2)",
+        fill: true,
+        tension: 0.4
+      }]
+    },
+    options: {
+      plugins: {
+        title: {
+          display: true,
+          text: "График около " + dt.toFormat("HH:mm ZZZZ")
+        }
       },
-      options: {
-        plugins: {
-          title: {
-            display: true,
-            text: 'График около ' + dt.toFormat("HH:mm ZZZZ")
-          }
-        },
-        scales: {
-          y: {
-            beginAtZero: true
-          }
+      scales: {
+        y: {
+          beginAtZero: true
         }
       }
-    });
-  }
+    }
+  });
+}
+
 
 
 
