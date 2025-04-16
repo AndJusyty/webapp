@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Выбор времени</title>
+  <title>Выбор даты и времени</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script src="https://cdn.jsdelivr.net/npm/luxon/build/global/luxon.min.js"></script>
@@ -37,10 +37,10 @@
 </head>
 <body>
 
-<h2>🕓 Выберите дату, время и таймзону</h2>
+<h2>📅 Выберите дату, время и таймзону</h2>
 
-<input type="date" id="dateinput" placeholder="Дата">
-<input type="time" id="timeinput" placeholder="Время">
+<input type="text" id="date" placeholder="Дата">
+<input type="text" id="time" placeholder="Время">
 <select id="timezone">
   <option value="UTC">UTC</option>
   <option value="Europe/Moscow" selected>Europe/Moscow</option>
@@ -58,6 +58,20 @@
 <script>
   const { DateTime } = luxon;
   let selectedDate = null;
+  let selectedTime = null;
+
+  flatpickr("#date", {
+    dateFormat: "Y-m-d",
+    onChange: (dates) => selectedDate = dates[0]
+  });
+
+  flatpickr("#time", {
+    enableTime: true,
+    noCalendar: true,
+    dateFormat: "H:i",
+    time_24hr: true,
+    onChange: (times) => selectedTime = times[0]
+  });
 
   const chart = new Chart(document.getElementById("timeChart"), {
     type: "line",
@@ -80,30 +94,24 @@
     }
   });
 
-  flatpickr("#dateinput", {
-    enableTime: true,
-    dateFormat: "Y-m-d",
-    time_24hr: true,
-    onChange: (dates) => selectedDate = dates[0]
-  });
-  flatpickr("#timeinput", {
-    enableTime: true,
-    dateFormat: "H:i",
-    time_24hr: true,
-    onChange: (time) => selectedDate = time[0]
-  });
-
   document.getElementById("showBtn").addEventListener("click", () => {
     const zone = document.getElementById("timezone").value;
-    if (!selectedDate) {
+    if (!selectedDate || !selectedTime) {
       document.getElementById("result").textContent = "⚠️ Сначала выберите дату и время!";
       return;
     }
 
-    const localTime = DateTime.fromJSDate(selectedDate).setZone(zone);
+    const merged = new Date(
+      selectedDate.getFullYear(),
+      selectedDate.getMonth(),
+      selectedDate.getDate(),
+      selectedTime.getHours(),
+      selectedTime.getMinutes()
+    );
+
+    const localTime = DateTime.fromJSDate(merged).setZone(zone);
     const utcTime = localTime.toUTC();
 
-    // Обновляем текстовый результат
     const result = `
 📍 Локальное время: ${localTime.toFormat("yyyy-MM-dd HH:mm ZZZZ")}
 🌍 UTC: ${utcTime.toFormat("yyyy-MM-dd HH:mm ZZZZ")}
@@ -112,7 +120,6 @@
 
     document.getElementById("result").textContent = result;
 
-    // Строим график ±6 часов
     const points = [];
     const labels = [];
     for (let i = -6; i <= 6; i++) {
@@ -126,7 +133,6 @@
     chart.update();
   });
 
-  // Telegram init
   if (window.Telegram && Telegram.WebApp) {
     Telegram.WebApp.ready();
     Telegram.WebApp.expand();
