@@ -39,7 +39,8 @@
 
 <h2>🕓 Выберите дату, время и таймзону</h2>
 
-<input type="text" id="datetime" placeholder="Дата и время">
+<input type="date" id="dateinput" placeholder="Дата">
+<input type="time" id="timeinput" placeholder="Время">
 <select id="timezone">
   <option value="UTC">UTC</option>
   <option value="Europe/Moscow" selected>Europe/Moscow</option>
@@ -79,11 +80,17 @@
     }
   });
 
-  flatpickr("#datetime", {
+  flatpickr("#dateinput", {
     enableTime: true,
-    dateFormat: "Y-m-d H:i",
+    dateFormat: "Y-m-d",
     time_24hr: true,
     onChange: (dates) => selectedDate = dates[0]
+  });
+  flatpickr("#timeinput", {
+    enableTime: true,
+    dateFormat: "H:i",
+    time_24hr: true,
+    onChange: (time) => selectedDate = time[0]
   });
 
   document.getElementById("showBtn").addEventListener("click", () => {
