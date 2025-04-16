@@ -12,17 +12,8 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-  <div>
-    <label>Выберите дату:</label>
-    <input type="date" id="dateInput"/>
-  </div>
-
-  <div style="margin-top: 10px;">
-    <label>Выберите время:</label>
-    <input type="time" id="timeInput"/>
-  </div>
-  <!-- <button id="submitBtn" style="margin-top: 20px;">Готово</button> -->
+  <h2>Выберите дату и время:</h2>
+  <input type="text" id="datetime" />
 
   <h3>Выберите таймзону:</h3>
   <select id="timezone">
@@ -32,8 +23,7 @@
     <option value="America/New_York">New York</option>
   </select>
 
-  <!-- <button onclick="handleSend()">Отправить</button> -->
-  <button id="submitBtn">Отправить</button>
+  <button onclick="handleSend()">Отправить</button>
 
   <canvas id="myChart" width="300" height="150"></canvas>
 

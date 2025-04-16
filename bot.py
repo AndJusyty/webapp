@@ -1,5 +1,3 @@
-
-
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, ContextTypes
 
@@ -14,4 +12,3 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 app = Application.builder().token("7979211167:AAEt9T-0LmzXVoqe7xw4AWKfVrKErYm2D70").build()
 app.add_handler(CommandHandler("start", start))
 app.run_polling()
-
