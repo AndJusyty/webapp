@@ -12,8 +12,17 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h2>Выберите дату и время:</h2>
-  <input type="text" id="datetime" />
+
+  <div>
+    <label>Выберите дату:</label>
+    <input type="date" id="dateInput"/>
+  </div>
+
+  <div style="margin-top: 10px;">
+    <label>Выберите время:</label>
+    <input type="time" id="timeInput"/>
+  </div>
+  <button id="submitBtn" style="margin-top: 20px;">Готово</button>
 
   <h3>Выберите таймзону:</h3>
   <select id="timezone">

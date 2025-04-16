@@ -1,21 +1,21 @@
-const DateTime = luxon.DateTime;
+// const DateTime = luxon.DateTime;
 
-flatpickr("#datetime", {
-  enableTime: true,
-  dateFormat: "Y-m-d H:i",
-  defaultDate: new Date()
-});
+// flatpickr("#datetime", {
+//   enableTime: true,
+//   dateFormat: "Y-m-d H:i",
+//   defaultDate: new Date()
+// });
 
-Telegram.WebApp.ready();
+// Telegram.WebApp.ready();
 
-function handleSend() {
-  const dateInput = document.getElementById("datetime").value;
-  const zone = document.getElementById("timezone").value;
+// function handleSend() {
+//   const dateInput = document.getElementById("datetime").value;
+//   const zone = document.getElementById("timezone").value;
 
-  if (!dateInput) {
-    alert("Выберите дату и время");
-    return;
-  }
+//   if (!dateInput) {
+//     alert("Выберите дату и время");
+//     return;
+//   }
 
   const localDT = DateTime.fromISO(dateInput);
   const zoned = localDT.setZone(zone);
@@ -30,7 +30,6 @@ function handleSend() {
 
   // Построить график (рандомные данные, как пример)
   drawChart(zoned);
-}
 
 function drawChart(dt) {
   const ctx = document.getElementById('myChart').getContext('2d');
@@ -42,7 +41,6 @@ function drawChart(dt) {
         label: 'Событие (время)',
         data: [5, 6, 8, 6, 4],
         fill: false,
-        borderColor: 'rgb(75, 192, 192)',
         tension: 0.3
       }]
     },
@@ -61,3 +59,28 @@ function drawChart(dt) {
     }
   });
 }
+
+
+const tg = window.Telegram.WebApp;
+
+  document.getElementById("submitBtn").addEventListener("click", () => {
+    const date = document.getElementById("dateInput").value;
+    const time = document.getElementById("timeInput").value;
+
+    if (!date || !time) {
+      alert("Пожалуйста, выберите дату и время");
+      return;
+    }
+
+    const datetimeString = `${date} ${time}`;
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+    tg.sendData(JSON.stringify({
+      datetime: datetimeString,
+      formatted: new Date(datetimeString).toLocaleString(),
+      timezone
+    }));
+
+    tg.close(); // Закрыть WebApp
+  });
+
