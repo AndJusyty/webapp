@@ -45,11 +45,22 @@ keyboard = ReplyKeyboardMarkup(
 )
 
 @dp.message(CommandStart())
-async def start_cmd(message: Message):
-    await message.answer(
-        "Привет! 👋\nНажми кнопку ниже, чтобы выбрать дату и время:",
-        reply_markup=keyboard
-    )
+@dp.message()
+async def handle_webapp_data(message: Message):
+    if message.web_app_data:
+        # message.web_app_data.data — это строка JSON
+        from json import loads
+        try:
+            data = loads(message.web_app_data.data)
+            date = data.get("date")
+            time = data.get("time")
+            timezone = data.get("timezone")
+            text = f"🗓 Дата: <b>{date}</b>\n⏰ Время: <b>{time}</b>\n🌍 Таймзона: <b>{timezone}</b>"
+        except Exception as e:
+            text = f"⚠️ Ошибка разбора данных: {e}"
+
+        await message.answer(text)
+
 
 from aiogram.filters import WebAppData
 
