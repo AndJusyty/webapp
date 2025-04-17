@@ -51,12 +51,16 @@ async def start_cmd(message: Message):
         reply_markup=keyboard
     )
 
-@dp.message()
+from aiogram.filters import WebAppData
+
+@dp.message(WebAppData())
 async def handle_webapp_data(message: Message):
-    if message.web_app_data:
-        await message.answer(
-            f"✅ Получено из WebApp:\n<pre>{message.web_app_data.data}</pre>"
-        )
+    data = message.web_app_data.data
+    await message.answer(
+        f"✅ Вы выбрали:\n<pre>{data}</pre>",
+        parse_mode="HTML"
+    )
+
 
 async def main():
     await bot.delete_webhook(drop_pending_updates=True)
