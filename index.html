@@ -1,40 +1,49 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Выбор даты и времени</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Дата и время</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Telegram Web Apps JS SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdn.jsdelivr.net/npm/luxon/build/global/luxon.min.js"></script>
 </head>
 <body>
-    <div class="container">
-        <h2>Выберите дату, время и таймзону</h2>
-        <input type="date" id="dateInput">
-        <input type="time" id="timeInput">
-        <select id="timezoneSelect">
-            <option value="UTC+0">UTC+0</option>
-            <option value="UTC+3">UTC+3 (Москва)</option>
-            <option value="UTC+5">UTC+5</option>
-            <option value="UTC+8">UTC+8</option>
-        </select>
-        <button onclick="sendDataToTelegram()">Отправить</button>
-    </div>
-
-    <script>
-        function sendDataToTelegram() {
-            const date = document.getElementById('dateInput').value;
-            const time = document.getElementById('timeInput').value;
-            const timezone = document.getElementById('timezoneSelect').value;
-            const result = JSON.stringify({ date, time, timezone });
-
-            if (window.Telegram && Telegram.WebApp) {
-                Telegram.WebApp.sendData(result);
-            } else {
-                alert("Telegram WebApp не найден");
-            }
-        }
-
-        Telegram.WebApp.ready();
-    </script>
+  <div class="container">
+    <h2>Выберите дату, время и таймзону</h2>
+    <input type="date" id="dateInput">
+    <input type="time" id="timeInput">
+    <select id="timezoneSelect">
+      <option value="UTC">UTC</option>
+      <option value="Europe/Moscow">Europe/Moscow</option>
+      <option value="Asia/Yekaterinburg">Asia/Yekaterinburg</option>
+      <option value="Europe/London">Europe/London</option>
+      <option value="Asia/Tokyo">Asia/Tokyo</option>
+      <option value="America/New_York">America/New_York</option>
+    </select>
+    <button onclick="sendData()">Отправить</button>
+    <div id="result" style="margin-top: 15px; color: #333;"></div>
+  </div>
+  <script>
+    function sendData() {
+      const date = document.getElementById('dateInput').value;
+      const time = document.getElementById('timeInput').value;
+      const timezone = document.getElementById('timezoneSelect').value;
+      const payload = JSON.stringify({ date, time, timezone });
+      if (window.Telegram && Telegram.WebApp) {
+        Telegram.WebApp.sendData(payload);
+      } else {
+        // Fallback: show result in page
+        document.getElementById('result').textContent = 'Данные: ' + payload;
+      }
+    }
+    // Init Telegram WebApp if available
+    if (window.Telegram && Telegram.WebApp) {
+      Telegram.WebApp.ready();
+      Telegram.WebApp.expand();
+    }
+  </script>
 </body>
 </html>

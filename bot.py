@@ -26,7 +26,7 @@ from aiogram.client.default import DefaultBotProperties
 from json import loads
 
 BOT_TOKEN = "7979211167:AAEt9T-0LmzXVoqe7xw4AWKfVrKErYm2D70"
-WEBAPP_URL = "https://andjusyty.github.io/webapp/"
+WEBAPP_URL = "https://andjusyty.github.io/webapp/"  
 
 bot = Bot(
     token=BOT_TOKEN,
