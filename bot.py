@@ -17,16 +17,16 @@
 
 # bot.polling()
 
-
 import asyncio
 from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
 from aiogram.types import WebAppInfo, KeyboardButton, ReplyKeyboardMarkup, Message
 from aiogram.filters import CommandStart
 from aiogram.client.default import DefaultBotProperties
+from json import loads
 
 BOT_TOKEN = "7979211167:AAEt9T-0LmzXVoqe7xw4AWKfVrKErYm2D70"
-WEBAPP_URL = "https://andjusyty.github.io/webapp/"  # Замени на свою ссылку
+WEBAPP_URL = "https://andjusyty.github.io/webapp/"
 
 bot = Bot(
     token=BOT_TOKEN,
@@ -45,11 +45,15 @@ keyboard = ReplyKeyboardMarkup(
 )
 
 @dp.message(CommandStart())
+async def start_cmd(message: Message):
+    await message.answer(
+        "Привет! 👋\nНажми кнопку ниже, чтобы выбрать дату и время:",
+        reply_markup=keyboard
+    )
+
 @dp.message()
 async def handle_webapp_data(message: Message):
     if message.web_app_data:
-        # message.web_app_data.data — это строка JSON
-        from json import loads
         try:
             data = loads(message.web_app_data.data)
             date = data.get("date")
@@ -60,18 +64,6 @@ async def handle_webapp_data(message: Message):
             text = f"⚠️ Ошибка разбора данных: {e}"
 
         await message.answer(text)
-
-
-from aiogram.filters import WebAppData
-
-@dp.message(WebAppData())
-async def handle_webapp_data(message: Message):
-    data = message.web_app_data.data
-    await message.answer(
-        f"✅ Вы выбрали:\n<pre>{data}</pre>",
-        parse_mode="HTML"
-    )
-
 
 async def main():
     await bot.delete_webhook(drop_pending_updates=True)
