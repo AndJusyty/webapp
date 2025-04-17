@@ -4,144 +4,158 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Выбор даты и времени</title>
+  <title>Дата и время</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script src="https://cdn.jsdelivr.net/npm/luxon/build/global/luxon.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
-      font-family: sans-serif;
+      font-family: "Segoe UI", sans-serif;
+      background: linear-gradient(to bottom, #f3f4f6, #e5e7eb);
+      margin: 0;
       padding: 20px;
-      background: #f5f5f5;
+      box-sizing: border-box;
+      color: #111827;
     }
-    input, select, button {
-      padding: 10px;
-      margin: 10px 0;
-      width: 100%;
-      font-size: 16px;
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
     }
-    canvas {
-      max-width: 100%;
-      margin-top: 20px;
-    }
-    #result {
+
+    .container {
+      max-width: 480px;
+      margin: auto;
       background: white;
-      padding: 15px;
-      border-radius: 10px;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    label {
+      font-weight: 500;
+      margin-top: 10px;
+      display: block;
+    }
+
+    input, select, button {
+      font-size: 16px;
+      padding: 12px;
+      margin-top: 8px;
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      outline: none;
+    }
+
+    button {
+      background: linear-gradient(to right, #3b82f6, #2563eb);
+      color: white;
+      font-weight: bold;
+      border: none;
       margin-top: 20px;
-      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: linear-gradient(to right, #2563eb, #1d4ed8);
+    }
+
+    #result {
+      margin-top: 20px;
+      font-size: 15px;
+      padding: 12px;
+      background: #f9fafb;
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
       white-space: pre-wrap;
     }
   </style>
 </head>
 <body>
-<div id="clearform">
-<h2>📅 Выберите дату, время и таймзону</h2>
+  <div class="container">
+    <h2>📅 Удобный выбор даты и времени</h2>
 
-<input type="text" id="date" placeholder="Дата">
-<input type="text" id="time" placeholder="Время">
-<select id="timezone">
-  <option value="UTC">UTC</option>
-  <option value="Europe/Moscow" selected>Europe/Moscow</option>
-  <option value="America/New_York">America/New_York</option>
-  <option value="Asia/Tokyo">Asia/Tokyo</option>
-  <option value="Asia/Yekaterinburg">Asia/Yekaterinburg</option>
-</select>
+    <label for="date">Дата</label>
+    <input type="text" id="date" placeholder="Выберите дату">
 
-<button id="showBtn">📊 Показать результат</button>
-<button onclick="location.reload()">Очистить</button>
+    <label for="time">Время</label>
+    <input type="text" id="time" placeholder="Выберите время">
 
-<div id="result">⏳ Ожидаем выбор...</div>
+    <label for="timezone">Таймзона</label>
+    <select id="timezone">
+      <option value="UTC">UTC</option>
+      <option value="Europe/Moscow" selected>Europe/Moscow</option>
+      <option value="Asia/Yekaterinburg">Asia/Yekaterinburg</option>
+      <option value="Europe/London">Europe/London</option>
+      <option value="Asia/Tokyo">Asia/Tokyo</option>
+      <option value="America/New_York">America/New_York</option>
+    </select>
 
-<canvas id="timeChart"></canvas>
-</div>
-<script>
+    <button id="submitBtn">✅ Готово</button>
 
-  
-  const { DateTime } = luxon;
-  let selectedDate = null;
-  let selectedTime = null;
+    <div id="result">⌛ Ожидаем ввод...</div>
+  </div>
 
-  flatpickr("#date", {
-    dateFormat: "Y-m-d",
-    onChange: (dates) => selectedDate = dates[0]
-  });
+  <script>
+    const { DateTime } = luxon;
+    let selectedDate = null;
+    let selectedTime = null;
 
-  flatpickr("#time", {
-    enableTime: true,
-    noCalendar: true,
-    dateFormat: "H:i",
-    time_24hr: true,
-    onChange: (times) => selectedTime = times[0]
-  });
+    flatpickr("#date", {
+      dateFormat: "Y-m-d",
+      onChange: (dates) => selectedDate = dates[0]
+    });
 
-  const chart = new Chart(document.getElementById("timeChart"), {
-    type: "line",
-    data: {
-      labels: [],
-      datasets: [{
-        label: "UTC Время (ISO)",
-        data: [],
-        borderColor: "blue",
-        borderWidth: 2,
-        fill: false,
-        tension: 0.1
-      }]
-    },
-    options: {
-      scales: {
-        x: { type: 'linear', title: { display: true, text: 'Часы от выбранного времени' } },
-        y: { title: { display: true, text: 'UNIX-время (сек)' } }
+    flatpickr("#time", {
+      enableTime: true,
+      noCalendar: true,
+      dateFormat: "H:i",
+      time_24hr: true,
+      onChange: (times) => selectedTime = times[0]
+    });
+
+    document.getElementById("submitBtn").addEventListener("click", () => {
+      const zone = document.getElementById("timezone").value;
+      if (!selectedDate || !selectedTime) {
+        document.getElementById("result").textContent = "⚠️ Сначала выберите дату и время!";
+        return;
       }
+
+      const merged = new Date(
+        selectedDate.getFullYear(),
+        selectedDate.getMonth(),
+        selectedDate.getDate(),
+        selectedTime.getHours(),
+        selectedTime.getMinutes()
+      );
+
+      const local = DateTime.fromJSDate(merged).setZone(zone);
+      const utc = local.toUTC();
+
+      const resultText = `
+📍 Локальное: ${local.toFormat("yyyy-MM-dd HH:mm ZZZZ")}
+🌐 UTC: ${utc.toFormat("yyyy-MM-dd HH:mm")} (ISO: ${utc.toISO()})
+🧭 Таймзона: ${zone}
+      `.trim();
+
+      document.getElementById("result").textContent = resultText;
+
+      if (window.Telegram && Telegram.WebApp) {
+        Telegram.WebApp.sendData(JSON.stringify({
+          datetime_iso: utc.toISO(),
+          timezone: zone,
+          local: local.toFormat("yyyy-MM-dd HH:mm ZZZZ")
+        }));
+      }
+    });
+
+    if (window.Telegram && Telegram.WebApp) {
+      Telegram.WebApp.ready();
+      Telegram.WebApp.expand();
     }
-  });
-
-  document.getElementById("showBtn").addEventListener("click", () => {
-    const zone = document.getElementById("timezone").value;
-    if (!selectedDate || !selectedTime) {
-      document.getElementById("result").textContent = "⚠️ Сначала выберите дату и время!";
-      return;
-    }
-
-    const merged = new Date(
-      selectedDate.getFullYear(),
-      selectedDate.getMonth(),
-      selectedDate.getDate(),
-      selectedTime.getHours(),
-      selectedTime.getMinutes()
-    );
-
-    const localTime = DateTime.fromJSDate(merged).setZone(zone);
-    const utcTime = localTime.toUTC();
-
-    const result = `
-📍 Локальное время: ${localTime.toFormat("yyyy-MM-dd HH:mm ZZZZ")}
-🌍 UTC: ${utcTime.toFormat("yyyy-MM-dd HH:mm ZZZZ")}
-🧭 ISO формат: ${utcTime.toISO()}
-    `.trim();
-
-    document.getElementById("result").textContent = result;
-
-    const points = [];
-    const labels = [];
-    for (let i = -6; i <= 6; i++) {
-      const dt = utcTime.plus({ hours: i });
-      labels.push(i);
-      points.push(dt.toSeconds());
-    }
-
-    chart.data.labels = labels;
-    chart.data.datasets[0].data = points;
-    chart.update();
-  });
-
-  if (window.Telegram && Telegram.WebApp) {
-    Telegram.WebApp.ready();
-    Telegram.WebApp.expand();
-  }
-</script>
-
-
+  </script>
 </body>
 </html>

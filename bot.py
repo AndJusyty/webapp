@@ -16,4 +16,3 @@ def send_webapp(message):
     bot.send_message(message.chat.id, "Нажми кнопку ниже для выбора даты/времени:", reply_markup=markup)
 
 bot.polling()
-
