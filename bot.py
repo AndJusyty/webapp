@@ -19,34 +19,31 @@
 
 
 import asyncio
-from aiogram import Bot, Dispatcher, types
+from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
-from aiogram.types import WebAppInfo, KeyboardButton, ReplyKeyboardMarkup
+from aiogram.types import WebAppInfo, KeyboardButton, ReplyKeyboardMarkup, Message
 from aiogram.filters import CommandStart
-from aiogram.types import Message
 from aiogram.client.default import DefaultBotProperties
 
-# 🔑 Твой токен и WebApp URL
 BOT_TOKEN = "7979211167:AAEt9T-0LmzXVoqe7xw4AWKfVrKErYm2D70"
-WEBAPP_URL = "https://andjusyty.github.io/webapp/"
+WEBAPP_URL = "https://andjusyty.github.io/webapp/"  # Замени на свою ссылку
 
-# ✅ Новая схема: parse_mode через DefaultBotProperties
 bot = Bot(
     token=BOT_TOKEN,
     default=DefaultBotProperties(parse_mode=ParseMode.HTML)
 )
-
 dp = Dispatcher()
 
-# ⌨️ Клавиатура с кнопкой
-keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
-keyboard.add(KeyboardButton(
-    text="📅 Выбрать дату и время",
-    web_app=WebAppInfo(url=WEBAPP_URL)
-))
+keyboard = ReplyKeyboardMarkup(
+    keyboard=[[
+        KeyboardButton(
+            text="📅 Выбрать дату и время",
+            web_app=WebAppInfo(url=WEBAPP_URL)
+        )
+    ]],
+    resize_keyboard=True
+)
 
-
-# /start — показать кнопку
 @dp.message(CommandStart())
 async def start_cmd(message: Message):
     await message.answer(
@@ -54,8 +51,6 @@ async def start_cmd(message: Message):
         reply_markup=keyboard
     )
 
-
-# Обработка данных из WebApp
 @dp.message()
 async def handle_webapp_data(message: Message):
     if message.web_app_data:
@@ -63,8 +58,6 @@ async def handle_webapp_data(message: Message):
             f"✅ Получено из WebApp:\n<pre>{message.web_app_data.data}</pre>"
         )
 
-
-# Запуск бота
 async def main():
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
