@@ -18,44 +18,53 @@
 # bot.polling()
 
 
+import asyncio
 from aiogram import Bot, Dispatcher, types
 from aiogram.types import WebAppInfo, KeyboardButton, ReplyKeyboardMarkup
-from aiogram.utils import executor
+from aiogram.enums import ParseMode
+from aiogram.filters import CommandStart
+from aiogram.types import Message
+from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
+from aiohttp import web
 
-# 🔑 Вставь сюда свой токен
+# 🔑 Твой токен
 BOT_TOKEN = "7979211167:AAEt9T-0LmzXVoqe7xw4AWKfVrKErYm2D70"
 
-bot = Bot(token=BOT_TOKEN)
-dp = Dispatcher(bot)
+# 🔗 Ссылка на WebApp
+WEBAPP_URL = "https://andjusyty.github.io/webapp/"
 
-# 🔘 Клавиатура с WebApp кнопкой
-webapp_url = "https://andjusyty.github.io/webapp/"  # ← замени на своё!
+bot = Bot(token=BOT_TOKEN, parse_mode=ParseMode.HTML)
+dp = Dispatcher()
 
+# ⌨️ Клавиатура
 keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
 keyboard.add(KeyboardButton(
     text="📅 Выбрать дату и время",
-    web_app=WebAppInfo(url=webapp_url)
+    web_app=WebAppInfo(url=WEBAPP_URL)
 ))
 
 
-# 🟢 /start
-@dp.message_handler(commands=['start'])
-async def start_cmd(message: types.Message):
+@dp.message(CommandStart())
+async def start_cmd(message: Message):
     await message.answer(
         "Привет! 👋\nНажми кнопку ниже, чтобы выбрать дату и время:",
         reply_markup=keyboard
     )
 
 
-# 📩 Обработка данных из WebApp
-@dp.message_handler(content_types=types.ContentType.WEB_APP_DATA)
-async def webapp_handler(message: types.Message):
-    try:
-        data = message.web_app_data.data
-        await message.answer(f"✅ Данные из WebApp:\n<pre>{data}</pre>", parse_mode="HTML")
-    except Exception as e:
-        await message.answer(f"⚠️ Ошибка при получении данных: {e}")
+@dp.message()
+async def handle_webapp_data(message: Message):
+    if message.web_app_data:
+        await message.answer(
+            f"✅ Данные из WebApp:\n<pre>{message.web_app_data.data}</pre>"
+        )
 
-# 🚀 Запуск
+
+async def main():
+    await bot.delete_webhook(drop_pending_updates=True)
+    await dp.start_polling(bot)
+
+
 if __name__ == "__main__":
-    executor.start_polling(dp, skip_updates=True)
+    asyncio.run(main())
+
